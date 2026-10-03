@@ -16,8 +16,8 @@
     "db:setup": "npm run db:ensure && npm run db:push && npm run db:seed",
     "db:setup:dev": "npm run db:ensure && npm run db:push && npm run db:seed:dev",
     "auth:migrate": "npm run db:push",
-    "db:seed": "dotenv -e .env.local -- node prisma/seed.mjs",
-    "db:seed:dev": "dotenv -e .env.local -v SEED_DEMO_DATA=true -- node prisma/seed.mjs && dotenv -e .env.local -v SEED_DEMO_DATA=true -- node prisma/seed-customers.mjs",
+    "db:seed": "dotenv -e .env.local -- node prisma/seed.mjs && dotenv -e .env.local -- node prisma/seed-sms.mjs",
+    "db:seed:dev": "dotenv -e .env.local -v SEED_DEMO_DATA=true -- node prisma/seed.mjs && dotenv -e .env.local -- node prisma/seed-sms.mjs && dotenv -e .env.local -v SEED_DEMO_DATA=true -- node prisma/seed-customers.mjs",
     "db:seed:customers": "dotenv -e .env.local -- node prisma/seed-customers.mjs",
     "db:seed:sms": "dotenv -e .env.local -- node prisma/seed-sms.mjs"
   },

@@ -8,6 +8,7 @@ export type SmsPlaceholderDefinition = { token: string; customerField: string };
 export type SmsCustomerData = {
   firstName: string;
   lastName: string;
+  isActive: boolean;
   customerCode: number;
   mobile: string;
   birthDate: Date | null;
@@ -37,6 +38,7 @@ function readCustomerField(field: string, customer: SmsCustomerData) {
     case "firstName + lastName": return `${customer.firstName} ${customer.lastName}`.trim();
     case "firstName": return customer.firstName;
     case "lastName": return customer.lastName;
+    case "isActive": return customer.isActive ? "فعال" : "غیرفعال";
     case "customerCode": return new Intl.NumberFormat("fa-IR").format(customer.customerCode);
     case "mobile": return customer.mobile;
     case "birthDate": return birthDateToPersian(customer.birthDate);

@@ -74,7 +74,6 @@ export function TagsManager({ initialTags }: { initialTags: TagRecord[] }) {
         <div>
           <p className="mb-2 text-sm text-zinc-500">مدیریت سیستم / تگ‌ها</p>
           <h1 className="text-3xl font-bold tracking-tight">مدیریت تگ‌ها</h1>
-          <p className="mt-2 text-sm text-zinc-400">تگ‌ها را بسازید و روی یک یا چند مشتری بگذارید.</p>
         </div>
         <button onClick={startCreate} className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 px-4 py-2.5 text-sm font-semibold text-zinc-950 hover:bg-white">
           <Plus className="size-4" /> تگ جدید

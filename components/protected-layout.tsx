@@ -12,7 +12,7 @@ export async function ProtectedLayout({children, module}: { children: React.Reac
     const allowedModules = await getAccessibleModules(role);
     return <div className="flex h-screen w-full overflow-hidden" dir="rtl"><Sidebar name={session.user.name} role={role}
                                                                                     allowedModules={allowedModules}/>
-        <main className="h-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto">{children}</main>
+        <main className="app-main h-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-slate-900 text-slate-100">{children}</main>
     </div>;
 }
 
@@ -23,6 +23,6 @@ export async function AdminLayout({children}: { children: React.ReactNode }) {
     return <div className="flex h-screen w-full overflow-hidden" dir="rtl"><Sidebar name={session.user.name}
                                                                                     role="admin"
                                                                                     allowedModules={await getAccessibleModules("admin")}/>
-        <main className="h-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto">{children}</main>
+        <main className="app-main h-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-slate-900 text-slate-100">{children}</main>
     </div>;
 }

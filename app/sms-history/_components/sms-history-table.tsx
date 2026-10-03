@@ -108,7 +108,6 @@ export function SmsHistoryTable({ initialResult }: { initialResult: HistoryResul
         <div>
           <p className="mb-2 text-sm text-zinc-500">مدیریت پیامک / تاریخچه</p>
           <h1 className="text-3xl font-bold tracking-tight">تاریخچهٔ پیامک‌ها</h1>
-          <p className="mt-2 text-sm text-zinc-400">وضعیت ثبت‌شده از درگاه، تاریخ ارسال و گیرندگان پیامک‌ها را ببینید.</p>
         </div>
       </header>
 

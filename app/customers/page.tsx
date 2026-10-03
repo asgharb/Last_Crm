@@ -15,7 +15,6 @@ export default async function CustomersPage() {
         <div>
           <p className="mb-2 text-sm text-zinc-500">مدیریت سیستم / مشتریان</p>
           <h1 className="text-3xl font-bold tracking-tight">مدیریت مشتریان</h1>
-          <p className="mt-2 text-sm text-zinc-400">فهرست و اطلاعات مشتریان ثبت‌شده</p>
         </div>
       </header>
       <CustomersTable initialCustomers={customers} availableTags={tags} smsTemplates={smsTemplates} canManageDocuments={session?.user.role === "admin"} />

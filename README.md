@@ -49,8 +49,9 @@ npm run dev
 3. Sequence مربوط به کد مشتری را ایجاد می‌کند.
 4. ساختار `prisma/schema.prisma` را با دیتابیس همگام می‌کند.
 5. ادمین اولیه را فقط در صورت نبودن ایجاد می‌کند.
-6. کاربران نمونه `operator` و `viewer` را فقط در صورت نبودن ایجاد می‌کند.
-7. مشتریان و تگ‌های نمونه را فقط در صورت نبودن ایجاد می‌کند.
+6. کلیدواژه‌های رزروشده پیامک را در صورت نبودن ایجاد می‌کند.
+7. کاربران نمونه `operator` و `viewer` را فقط در صورت نبودن ایجاد می‌کند.
+8. مشتریان و تگ‌های نمونه را فقط در صورت نبودن ایجاد می‌کند.
 
 کاربران معمولی و مشتریان نمونه فقط با فرمان توسعه ساخته می‌شوند و در راه‌اندازی Production ایجاد نخواهند شد.
 
@@ -63,7 +64,9 @@ npm run build
 npm start
 ```
 
-پیش از `npm start`، فرمان امن `db:setup` اجرا می‌شود. این فرمان دیتابیس و schema را آماده می‌کند، اما از داده‌های اولیه فقط ادمین مفقود را ایجاد می‌کند. کاربران معمولی، مشتریان نمونه و تگ‌های نمونه در Production ساخته نمی‌شوند.
+پیش از `npm start`، فرمان امن `db:setup` اجرا می‌شود. این فرمان دیتابیس و schema را آماده می‌کند و ادمین مفقود و کلیدواژه‌های رزروشده پیامک را می‌سازد. کاربران معمولی، مشتریان نمونه و تگ‌های نمونه در Production ساخته نمی‌شوند.
+
+کلیدواژه‌های رزروشده در هر دو محیط Development و Production عبارت‌اند از: `((نام مشتری))`، `((نام خانوادگی مشتری))`، `((نام کامل مشتری))`، `((وضعیت مشتری))` و `((شهر مشتری))`. هنگام ارسال پیامک، مقدار هر کلیدواژه از پرونده همان مشتری خوانده می‌شود؛ بنابراین یک قالب واحد برای هر مشتری با اطلاعات اختصاصی او رندر می‌شود.
 
 برای اجرای دستی:
 
@@ -144,8 +147,9 @@ Before the development server starts, `db:setup:dev` automatically:
 3. Creates the customer-code sequence.
 4. Synchronizes `prisma/schema.prisma` with the database.
 5. Creates the initial administrator only when missing.
-6. Creates the sample `operator` and `viewer` users only when missing.
-7. Creates sample customers and starter tags only when missing.
+6. Creates the reserved SMS placeholders when missing.
+7. Creates the sample `operator` and `viewer` users only when missing.
+8. Creates sample customers and starter tags only when missing.
 
 Regular sample users and sample customers are development-only and are not created by the production setup.
 
@@ -158,7 +162,9 @@ npm run build
 npm start
 ```
 
-Before `npm start`, the production-safe `db:setup` command prepares the database and schema. From the seed data, it creates only a missing administrator. It does not create regular users, sample customers, or starter tags.
+Before `npm start`, the production-safe `db:setup` command prepares the database and schema and creates the missing administrator and reserved SMS placeholders. It does not create regular users, sample customers, or starter tags.
+
+The reserved placeholders available in both Development and Production are `((نام مشتری))`, `((نام خانوادگی مشتری))`, `((نام کامل مشتری))`, `((وضعیت مشتری))`, and `((شهر مشتری))`. During SMS delivery, every placeholder is resolved from the current recipient's customer record, so the same template is rendered with different values for each customer.
 
 Run the production-safe setup manually with:
 
@@ -201,8 +207,8 @@ Administrators can download a JSON export or create a native SQL Server `.bak` f
 | `npm run dev` | اجرای محیط توسعه همراه داده‌های نمونه / Start development with sample data |
 | `npm run build` | ساخت نسخه Production / Create the production build |
 | `npm start` | اجرای Production همراه راه‌اندازی امن دیتابیس / Start production with safe database setup |
-| `npm run db:setup` | ساخت دیتابیس، schema و فقط ادمین / Prepare database, schema, and admin only |
+| `npm run db:setup` | ساخت دیتابیس، schema، ادمین و کلیدواژه‌های پیامک / Prepare database, schema, admin, and SMS placeholders |
 | `npm run db:setup:dev` | راه‌اندازی دیتابیس همراه داده‌های نمونه / Prepare database with development sample data |
-| `npm run db:seed` | ایجاد ادمین مفقود / Create the missing administrator |
-| `npm run db:seed:dev` | ایجاد داده‌های نمونه مفقود / Create missing development sample data |
+| `npm run db:seed` | ایجاد ادمین و کلیدواژه‌های مفقود / Create missing admin and SMS placeholders |
+| `npm run db:seed:dev` | ایجاد ادمین، کلیدواژه‌ها و داده‌های نمونه مفقود / Create missing admin, placeholders, and development sample data |
 | `npm run typecheck` | بررسی TypeScript / Run TypeScript checks |
