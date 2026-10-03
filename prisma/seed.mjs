@@ -4,13 +4,14 @@ import { randomUUID } from "node:crypto";
 
 const prisma = new PrismaClient();
 
-const seedUsers = [
-  {
-    username: process.env.SEED_ADMIN_USERNAME || "admin",
-    name: "System Administrator",
-    role: "admin",
-    password: process.env.SEED_ADMIN_PASSWORD,
-  },
+const adminUser = {
+  username: process.env.SEED_ADMIN_USERNAME || "admin",
+  name: "System Administrator",
+  role: "admin",
+  password: process.env.SEED_ADMIN_PASSWORD,
+};
+
+const developmentUsers = [
   {
     username: "operator",
     name: "Dashboard Operator",
@@ -25,58 +26,43 @@ const seedUsers = [
   },
 ];
 
-function validateUsers() {
-  for (const user of seedUsers) {
-    if (!user.password || user.password.length < 12) {
-      throw new Error(`Set a unique password of at least 12 characters for ${user.username} in .env.local.`);
-    }
-    if (user.username.length < 3 || user.username.length > 30) {
-      throw new Error(`Seed username ${user.username} must be between 3 and 30 characters.`);
-    }
-  }
-}
+const seedUsers = process.env.SEED_DEMO_DATA === "true"
+  ? [adminUser, ...developmentUsers]
+  : [adminUser];
 
 async function seedUser({ username, name, role, password }) {
   const normalizedUsername = username.toLowerCase();
   const email = `${normalizedUsername}@seed.local`;
-  const user = await prisma.user.upsert({
-    where: { username: normalizedUsername },
-    update: {
-      name,
-      email,
-      role,
-      isActive: true,
-      isDeleted: false,
-      deletedAt: null,
-      banned: false,
-      banReason: null,
-      banExpires: null,
-    },
-    create: {
-      id: randomUUID(),
-      name,
-      email,
-      emailVerified: false,
-      username: normalizedUsername,
-      displayUsername: username,
-      role,
-      isActive: true,
-      isDeleted: false,
-    },
-  });
+  const existingUser = await prisma.user.findUnique({ where: { username: normalizedUsername } });
+  if (existingUser) {
+    console.log(`Seed user already exists: ${normalizedUsername}`);
+    return;
+  }
 
-  const account = await prisma.account.findFirst({
-    where: { userId: user.id, providerId: "credential" },
-  });
+  if (!password || password.length < 12) {
+    throw new Error(`Set a unique password of at least 12 characters for ${username} in .env.local.`);
+  }
+  if (username.length < 3 || username.length > 30) {
+    throw new Error(`Seed username ${username} must be between 3 and 30 characters.`);
+  }
+
   const hashedPassword = await hashPassword(password);
-
-  if (account) {
-    await prisma.account.update({
-      where: { id: account.id },
-      data: { accountId: user.id, password: hashedPassword, updatedAt: new Date() },
+  await prisma.$transaction(async (transaction) => {
+    const user = await transaction.user.create({
+      data: {
+        id: randomUUID(),
+        name,
+        email,
+        emailVerified: false,
+        username: normalizedUsername,
+        displayUsername: username,
+        role,
+        isActive: true,
+        isDeleted: false,
+      },
     });
-  } else {
-    await prisma.account.create({
+
+    await transaction.account.create({
       data: {
         id: randomUUID(),
         accountId: user.id,
@@ -85,13 +71,12 @@ async function seedUser({ username, name, role, password }) {
         password: hashedPassword,
       },
     });
-  }
+  });
 
   console.log(`Seeded ${role} user: ${normalizedUsername}`);
 }
 
 try {
-  validateUsers();
   for (const user of seedUsers) await seedUser(user);
 } finally {
   await prisma.$disconnect();

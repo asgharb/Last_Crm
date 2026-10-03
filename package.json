@@ -3,15 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "predev": "npm run db:setup:dev",
     "dev": "next dev --turbopack",
     "build": "next build",
+    "prestart": "npm run db:setup",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "db:generate": "prisma generate",
+    "db:ensure": "dotenv -e .env.local -- tsx scripts/ensure-db.ts",
     "db:push": "dotenv -e .env.local -- node prisma/ensure-customer-sequence.mjs && dotenv -e .env.local -- prisma db push",
+    "db:setup": "npm run db:ensure && npm run db:push && npm run db:seed",
+    "db:setup:dev": "npm run db:ensure && npm run db:push && npm run db:seed:dev",
     "auth:migrate": "npm run db:push",
     "db:seed": "dotenv -e .env.local -- node prisma/seed.mjs",
+    "db:seed:dev": "dotenv -e .env.local -v SEED_DEMO_DATA=true -- node prisma/seed.mjs && dotenv -e .env.local -v SEED_DEMO_DATA=true -- node prisma/seed-customers.mjs",
     "db:seed:customers": "dotenv -e .env.local -- node prisma/seed-customers.mjs",
     "db:seed:sms": "dotenv -e .env.local -- node prisma/seed-sms.mjs"
   },
@@ -45,6 +51,7 @@
     "eslint-config-next": "~16.3.0",
     "prisma": "^6.19.0",
     "tailwindcss": "^4.1.0",
+    "tsx": "^4.23.15",
     "typescript": "~7.0.2"
   }
 }

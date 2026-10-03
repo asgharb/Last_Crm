@@ -1,5 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 
+const shouldSeedDemoData = process.env.SEED_DEMO_DATA === "true";
+if (!shouldSeedDemoData) {
+  console.log("Skipping sample customers outside the development seed command.");
+  process.exit(0);
+}
+
 const prisma = new PrismaClient();
 
 const starterTags = [
@@ -48,25 +54,26 @@ const customers = [
 }));
 
 try {
-  const savedTags = await Promise.all(starterTags.map((tag) => prisma.tag.upsert({
-    where: { name: tag.name },
-    update: { color: tag.color, isDeleted: false, deletedAt: null },
-    create: tag,
-  })));
+  const savedTags = await Promise.all(starterTags.map(async (tag) => {
+    const existingTag = await prisma.tag.findUnique({ where: { name: tag.name } });
+    return existingTag || prisma.tag.create({ data: tag });
+  }));
   const tagIds = Object.fromEntries(savedTags.map((tag) => [tag.name, tag.id]));
+  let createdCustomers = 0;
 
   for (const [index, customer] of customers.entries()) {
-    const savedCustomer = await prisma.customer.upsert({
-      where: { mobile: customer.mobile },
-      update: { ...customer, isDeleted: false, deletedAt: null },
-      create: { ...customer, isDeleted: false },
+    const existingCustomer = await prisma.customer.findUnique({ where: { mobile: customer.mobile } });
+    if (existingCustomer) continue;
+
+    const savedCustomer = await prisma.customer.create({
+      data: { ...customer, isDeleted: false },
     });
+    createdCustomers += 1;
     const selectedTags = [
       ...(index % 4 === 0 ? [tagIds["نمایشگاه"]] : []),
       ...(index % 7 === 0 ? [tagIds.VIP] : []),
       ...(index % 3 === 0 ? [tagIds["خوش‌حساب"]] : []),
     ];
-    await prisma.customerTag.deleteMany({ where: { customerId: savedCustomer.id } });
     if (selectedTags.length) {
       await prisma.customerTag.createMany({
         data: selectedTags.map((tagId) => ({ customerId: savedCustomer.id, tagId })),
@@ -74,10 +81,7 @@ try {
     }
   }
 
-  const seeded = await prisma.customer.count({
-    where: { mobile: { in: customers.map((customer) => customer.mobile) }, isDeleted: false },
-  });
-  console.log(`Seeded ${seeded} sample customers and ${savedTags.length} starter tags.`);
+  console.log(`Created ${createdCustomers} missing sample customers; ${savedTags.length} starter tags are available.`);
 } finally {
   await prisma.$disconnect();
 }
