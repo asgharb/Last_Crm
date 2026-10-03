@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @db.NVarChar(64)
+  name            String    @db.NVarChar(120)
+  email           String    @unique @db.NVarChar(320)
+  emailVerified   Boolean   @default(false)
+  image           String?   @db.NVarChar(2048)
+  createdAt       DateTime  @default(now()) @db.DateTime2
+  updatedAt       DateTime  @updatedAt @db.DateTime2
+  username        String?   @unique @db.NVarChar(30)
+  displayUsername String?   @db.NVarChar(30)
+  role            String    @default("user") @db.NVarChar(30)
+  banned          Boolean?  @default(false)
+  banReason       String?   @db.NVarChar(500)
+  banExpires      DateTime? @db.DateTime2
+  isActive        Boolean   @default(true)
+  isDeleted       Boolean   @default(false)
+  deletedAt       DateTime? @db.DateTime2
+  sessions        Session[]
+  accounts        Account[]
+
+  @@index([isDeleted], map: "user_is_deleted_idx")
+}
+
+model RolePermission {
+  role      String   @db.NVarChar(30)
+  module    String   @db.NVarChar(40)
+  allowed   Boolean  @default(false)
+  updatedAt DateTime @updatedAt @db.DateTime2
+
+  @@id([role, module], map: "role_permission_pk")
+  @@index([module], map: "role_permission_module_idx")
+}
+
+model Session {
+  id             String   @id @db.NVarChar(64)
+  expiresAt      DateTime @db.DateTime2
+  token          String   @unique @db.NVarChar(255)
+  createdAt      DateTime @default(now()) @db.DateTime2
+  updatedAt      DateTime @updatedAt @db.DateTime2
+  ipAddress      String?  @db.NVarChar(128)
+  userAgent      String?  @db.NVarChar(1024)
+  userId         String   @db.NVarChar(64)
+  impersonatedBy String?  @db.NVarChar(64)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @db.NVarChar(64)
+  accountId             String    @db.NVarChar(255)
+  providerId            String    @db.NVarChar(100)
+  userId                String    @db.NVarChar(64)
+  accessToken           String?   @db.NVarChar(Max)
+  refreshToken          String?   @db.NVarChar(Max)
+  idToken               String?   @db.NVarChar(Max)
+  accessTokenExpiresAt  DateTime? @db.DateTime2
+  refreshTokenExpiresAt DateTime? @db.DateTime2
+  scope                 String?   @db.NVarChar(2048)
+  password              String?   @db.NVarChar(255)
+  createdAt             DateTime  @default(now()) @db.DateTime2
+  updatedAt             DateTime  @updatedAt @db.DateTime2
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @db.NVarChar(64)
+  identifier String   @db.NVarChar(255)
+  value      String   @db.NVarChar(255)
+  expiresAt  DateTime @db.DateTime2
+  createdAt  DateTime @default(now()) @db.DateTime2
+  updatedAt  DateTime @updatedAt @db.DateTime2
+
+  @@index([identifier])
+}
+
+model Customer {
+  id            String        @id @default(uuid()) @db.NVarChar(36)
+  customerCode  Int           @unique(map: "customer_code_unique") @default(dbgenerated("(NEXT VALUE FOR [dbo].[CustomerCodeSequence])"))
+  firstName     String        @db.NVarChar(100)
+  lastName      String        @db.NVarChar(100)
+  nationalCode  String        @db.NVarChar(10)
+  mobile        String        @unique(map: "customer_mobile_unique") @db.NVarChar(20)
+  telephone     String?       @db.NVarChar(20)
+  economicCode  String?       @db.NVarChar(32)
+  gender        String?       @db.NVarChar(16)
+  fatherName    String?       @db.NVarChar(100)
+  birthDate     DateTime?     @db.Date
+  province      String?       @db.NVarChar(100)
+  city          String?       @db.NVarChar(100)
+  address       String?       @db.NVarChar(Max)
+  maritalStatus String?       @db.NVarChar(20)
+  customerClass String        @default("retailer") @db.NVarChar(20)
+  isActive      Boolean       @default(true)
+  isDeleted     Boolean       @default(false)
+  deletedAt     DateTime?     @db.DateTime2
+  createdAt     DateTime      @default(now()) @db.DateTime2
+  updatedAt     DateTime      @updatedAt @db.DateTime2
+  tags          CustomerTag[]
+  documents     CustomerDocument[]
+  smsDeliveries SmsDelivery[]
+
+  @@index([isDeleted], map: "customer_is_deleted_idx")
+  @@index([lastName, firstName], map: "customer_name_idx")
+}
+
+model CustomerDocument {
+  id           String   @id @default(uuid()) @db.NVarChar(36)
+  customerId   String   @db.NVarChar(36)
+  fileName     String   @db.NVarChar(255)
+  contentType  String   @db.NVarChar(150)
+  size         Int
+  content      Bytes    @db.VarBinary(Max)
+  createdAt    DateTime @default(now()) @db.DateTime2
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId, createdAt], map: "customer_document_customer_idx")
+}
+
+model Tag {
+  id        String        @id @default(uuid()) @db.NVarChar(36)
+  name      String        @unique(map: "tag_name_unique") @db.NVarChar(60)
+  color     String        @default("#71717a") @db.VarChar(7)
+  isDeleted Boolean       @default(false)
+  deletedAt DateTime?     @db.DateTime2
+  createdAt DateTime      @default(now()) @db.DateTime2
+  updatedAt DateTime      @updatedAt @db.DateTime2
+  customers CustomerTag[]
+
+  @@index([isDeleted], map: "tag_is_deleted_idx")
+}
+
+model CustomerTag {
+  customerId String   @db.NVarChar(36)
+  tagId      String   @db.NVarChar(36)
+  assignedAt DateTime @default(now()) @db.DateTime2
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([customerId, tagId], map: "customer_tag_pk")
+  @@index([tagId], map: "customer_tag_tag_idx")
+}
+
+model SmsTemplate {
+  id           String                   @id @default(uuid()) @db.NVarChar(36)
+  name         String                   @db.NVarChar(100)
+  content      String                   @db.NVarChar(Max)
+  isActive     Boolean                  @default(true)
+  isDeleted    Boolean                  @default(false)
+  deletedAt    DateTime?                @db.DateTime2
+  createdAt    DateTime                 @default(now()) @db.DateTime2
+  updatedAt    DateTime                 @updatedAt @db.DateTime2
+  placeholders SmsTemplatePlaceholder[]
+  deliveries   SmsDelivery[]
+
+  @@index([isDeleted, isActive], map: "sms_template_status_idx")
+  @@index([createdAt], map: "sms_template_created_idx")
+}
+
+model SmsPlaceholder {
+  id            String                   @id @default(uuid()) @db.NVarChar(36)
+  token         String                   @unique(map: "sms_placeholder_token_unique") @db.NVarChar(120)
+  label         String                   @db.NVarChar(100)
+  description   String                   @db.NVarChar(300)
+  customerField String                   @db.NVarChar(100)
+  isSystem      Boolean                  @default(true)
+  isDeleted     Boolean                  @default(false)
+  deletedAt     DateTime?                @db.DateTime2
+  createdAt     DateTime                 @default(now()) @db.DateTime2
+  updatedAt     DateTime                 @updatedAt @db.DateTime2
+  templates     SmsTemplatePlaceholder[]
+
+  @@index([isDeleted], map: "sms_placeholder_is_deleted_idx")
+}
+
+model SmsTemplatePlaceholder {
+  templateId    String         @db.NVarChar(36)
+  placeholderId String         @db.NVarChar(36)
+  template      SmsTemplate    @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  placeholder   SmsPlaceholder @relation(fields: [placeholderId], references: [id], onDelete: Cascade)
+
+  @@id([templateId, placeholderId], map: "sms_template_placeholder_pk")
+  @@index([placeholderId], map: "sms_template_placeholder_placeholder_idx")
+}
+
+model SmsDelivery {
+  id                    String       @id @default(uuid()) @db.NVarChar(36)
+  customerId            String?      @db.NVarChar(36)
+  templateId            String?      @db.NVarChar(36)
+  customerName          String       @db.NVarChar(210)
+  templateName          String       @db.NVarChar(100)
+  recipientMobile       String       @db.NVarChar(20)
+  body                  String       @db.NVarChar(Max)
+  provider              String       @db.NVarChar(40)
+  providerMessageId     String?      @db.NVarChar(120)
+  providerStatus        String       @default("queued") @db.NVarChar(50)
+  providerStatusMessage String?      @db.NVarChar(500)
+  providerResponse      String?      @db.NVarChar(Max)
+  isDeleted             Boolean      @default(false)
+  deletedAt             DateTime?    @db.DateTime2
+  createdAt             DateTime     @default(now()) @db.DateTime2
+  updatedAt             DateTime     @updatedAt @db.DateTime2
+  customer              Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  template              SmsTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([isDeleted, createdAt], map: "sms_delivery_history_idx")
+  @@index([recipientMobile], map: "sms_delivery_mobile_idx")
+  @@index([customerName], map: "sms_delivery_name_idx")
+  @@index([providerStatus], map: "sms_delivery_status_idx")
+}

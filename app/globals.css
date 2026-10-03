@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body { margin: 0; background: #09090b; color: #fafafa; font-family: var(--font-vazirmatn), sans-serif; }
+button, input, select { font: inherit; }
+::selection { background: #3f3f46; color: white; }
+.toast-progress { position: relative; overflow: hidden; }
+.toast-progress::after { content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 2px; background: currentColor; opacity: .55; transform-origin: right; animation: toast-progress 7s linear forwards; }
+@keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.dialog-overlay[data-state="open"] { animation: overlay-in 160ms ease-out both; }
+.dialog-overlay[data-state="closed"] { animation: overlay-out 120ms ease-in both; }
+.dialog-content[data-state="open"] { animation: dialog-in 180ms cubic-bezier(.16, 1, .3, 1) both; }
+.dialog-content[data-state="closed"] { animation: dialog-out 120ms ease-in both; }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes dialog-in { from { opacity: 0; transform: translate(-50%, -48%) scale(.98); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes dialog-out { from { opacity: 1; transform: translate(-50%, -50%) scale(1); } to { opacity: 0; transform: translate(-50%, -48%) scale(.98); } }
+
+.customer-date-picker.rmdp-wrapper {
+  border: 1px solid #3f3f46;
+  border-radius: 0.75rem;
+  background: #09090b;
+  color: #f4f4f5;
+  box-shadow: 0 20px 45px rgb(0 0 0 / 0.45);
+}
+.customer-date-picker .rmdp-header-values,
+.customer-date-picker .rmdp-week-day,
+.customer-date-picker .rmdp-day,
+.customer-date-picker .rmdp-day span {
+  color: #d4d4d8;
+}
+.customer-date-picker .rmdp-arrow-container:hover,
+.customer-date-picker .rmdp-day:not(.rmdp-disabled):not(.rmdp-deactive) span:hover {
+  background: #27272a;
+}
+.customer-date-picker .rmdp-arrow {
+  border-color: #d4d4d8;
+}
+.customer-date-picker .rmdp-day.rmdp-selected span:not(.highlight) {
+  background: #e4e4e7;
+  color: #18181b;
+  box-shadow: none;
+}
+.customer-date-picker .rmdp-day.rmdp-today span {
+  background: #27272a;
+  color: #fafafa;
+}
