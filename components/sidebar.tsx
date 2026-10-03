@@ -15,7 +15,9 @@ import {
     Archive,
     SlidersHorizontal,
     MessageSquare,
-    DatabaseZap
+    Settings,
+    HeartPulse,
+    KeyRound
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import type { AccessModule } from "@/lib/access-modules";
@@ -61,7 +63,10 @@ const MENU_GROUPS: MenuGroup[] = [
         items: [
             { href: "/users", label: "مدیریت کاربران", icon: Users, module: "users" },
             { href: "/role-permissions", label: "دسترسی نقش‌ها", icon: ShieldCheck, adminOnly: true },
-            { href: "/backup", label: "پشتیبان‌گیری و بازیابی", icon: Archive, module: "backup" }
+            { href: "/backup", label: "پشتیبان‌گیری و بازیابی", icon: Archive, module: "backup" },
+            { href: "/health", label: "سلامت سرور", icon: HeartPulse, adminOnly: true },
+            { href: "/settings", label: "تنظیمات سازمان", icon: Settings, adminOnly: true },
+            { href: "/account", label: "حساب من", icon: KeyRound }
         ]
     }
 ];
@@ -70,10 +75,13 @@ export function Sidebar({
                             name,
                             role,
                             allowedModules
+                            , organizationName, logoData
                         }: {
     name: string;
     role: string;
     allowedModules: AccessModule[];
+    organizationName: string;
+    logoData: string | null;
 }) {
     const pathname = usePathname();
     const router = useRouter();
@@ -106,12 +114,12 @@ export function Sidebar({
         <aside className="flex h-full w-64 shrink-0 flex-col border-l border-slate-800/80 bg-slate-950 text-slate-200 px-3 py-5 max-sm:w-[4.5rem] max-sm:px-2 select-none">
             {/* Header / Logo */}
             <div className="mb-6 flex items-center gap-3 px-2 max-sm:justify-center max-sm:px-0">
-                <div className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20">
-                    <ShieldCheck className="size-5" />
+                <div className="brand-logo grid size-10 place-items-center overflow-hidden rounded-xl text-white shadow-lg">
+                    {logoData ? <img src={logoData} alt="" className="size-full object-contain p-1" /> : <ShieldCheck className="size-5" />}
                 </div>
                 <div className="max-sm:hidden">
-                    <div className="font-bold tracking-tight text-white">پنل مدیریت</div>
-                    <div className="text-xs text-indigo-400/80">داشبورد سازمانی</div>
+                    <div className="max-w-40 truncate font-bold tracking-tight text-white">{organizationName}</div>
+                    <div className="brand-text text-xs">داشبورد سازمانی</div>
                 </div>
             </div>
 
@@ -158,7 +166,7 @@ export function Sidebar({
                                                 aria-label={menuItem.label}
                                                 className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-all max-sm:justify-center max-sm:px-2 ${
                                                     isActive
-                                                        ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30"
+                                                        ? "brand-active text-white shadow-sm"
                                                         : "text-slate-400 hover:bg-slate-900/90 hover:text-indigo-200"
                                                 }`}
                                             >
@@ -166,7 +174,7 @@ export function Sidebar({
                                                     className={`size-4 transition-colors ${
                                                         isActive
                                                             ? "text-white"
-                                                            : "text-slate-400 group-hover:text-indigo-400"
+                                                            : "text-slate-400 group-hover:text-[var(--brand-hover)]"
                                                     }`}
                                                 />
                                                 <span className="truncate max-sm:sr-only">
@@ -185,12 +193,12 @@ export function Sidebar({
             {/* Footer / User Info */}
             <div className="mt-auto border-t border-slate-800/80 pt-4">
                 <div className="flex items-center gap-3 rounded-xl bg-slate-900/50 p-2 max-sm:flex-col max-sm:gap-2 max-sm:bg-transparent max-sm:px-0">
-                    <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-indigo-950 text-indigo-300 font-bold border border-indigo-800/40 text-sm">
+                    <div className="brand-avatar grid size-9 shrink-0 place-items-center rounded-lg font-bold text-sm">
                         {name.slice(0, 1)}
                     </div>
                     <div className="min-w-0 flex-1 max-sm:hidden">
                         <div className="truncate text-xs font-medium text-slate-200">{name}</div>
-                        <div className="text-[11px] text-indigo-400/80">
+                        <div className="brand-text text-[11px]">
                             {role === "admin" ? "مدیر سیستم" : "کاربر"}
                         </div>
                     </div>

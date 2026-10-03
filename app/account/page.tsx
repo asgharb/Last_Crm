@@ -1,0 +1,2 @@
+import { PasswordForm } from "./_components/password-form";
+export default function AccountPage() { return <section className="mx-auto max-w-5xl p-5 sm:p-8 lg:p-10"><header className="mb-8"><p className="mb-2 text-sm text-zinc-500">حساب کاربری / امنیت</p><h1 className="text-3xl font-bold tracking-tight">حساب من</h1><p className="mt-2 text-sm text-zinc-400">گذرواژه و امنیت حساب خود را مدیریت کنید.</p></header><PasswordForm /></section>; }

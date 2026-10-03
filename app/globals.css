@@ -1,43 +1,73 @@
 @import "tailwindcss";
 
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+  --brand: #4f46e5;
+  --brand-hover: #6366f1;
+  --brand-rgb: 79 70 229;
+  --body: #020617;
+  --page-start: #111827;
+  --page-end: #0f172a;
+  --surface-deep: #0f172a;
+  --surface-card: #182235;
+  --surface-muted: #26334a;
+  --border-soft: #2b3950;
+  --border-strong: #3b4a63;
+  --text-main: #f1f5f9;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+}
+html[data-theme="light"] {
+  color-scheme: light;
+  --body: #e8edf5;
+  --page-start: #f8fafc;
+  --page-end: #e8eef7;
+  --surface-deep: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-muted: #e2e8f0;
+  --border-soft: #d6deea;
+  --border-strong: #bac7d8;
+  --text-main: #0f172a;
+  --text-soft: #334155;
+  --text-muted: #64748b;
+}
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; }
-body { margin: 0; background: #020617; color: #e2e8f0; font-family: var(--font-vazirmatn), sans-serif; }
+body { margin: 0; background: var(--body); color: var(--text-main); font-family: var(--font-vazirmatn), sans-serif; }
 button, input, select { font: inherit; }
-::selection { background: #4f46e5; color: white; }
+::selection { background: var(--brand); color: white; }
 
 .app-main {
   background-image:
-    radial-gradient(circle at 12% 8%, rgb(79 70 229 / 0.12), transparent 28rem),
-    linear-gradient(180deg, #111827 0%, #0f172a 100%);
+    radial-gradient(circle at 12% 8%, rgb(var(--brand-rgb) / 0.12), transparent 28rem),
+    linear-gradient(180deg, var(--page-start) 0%, var(--page-end) 100%);
 }
 
-.app-main :is([class~="bg-zinc-950"], [class~="bg-zinc-950/70"], [class~="bg-zinc-950/60"], [class~="bg-zinc-950/50"], [class~="bg-zinc-950/45"]) { background-color: #0f172a; }
-.app-main :is([class~="bg-zinc-900"], [class~="bg-zinc-900/80"], [class~="bg-zinc-900/70"], [class~="bg-zinc-900/60"], [class~="bg-zinc-900/50"]) { background-color: #182235; }
-.app-main :is([class~="bg-zinc-800"], [class~="bg-zinc-800/80"], [class~="bg-zinc-800/60"], [class~="bg-zinc-800/50"]) { background-color: #26334a; }
-.app-main [class~="bg-zinc-100"] { background-color: #4f46e5; }
+.app-main :is([class~="bg-zinc-950"], [class~="bg-zinc-950/70"], [class~="bg-zinc-950/60"], [class~="bg-zinc-950/50"], [class~="bg-zinc-950/45"]) { background-color: var(--surface-deep); }
+.app-main :is([class~="bg-zinc-900"], [class~="bg-zinc-900/80"], [class~="bg-zinc-900/70"], [class~="bg-zinc-900/60"], [class~="bg-zinc-900/50"]) { background-color: var(--surface-card); }
+.app-main :is([class~="bg-zinc-800"], [class~="bg-zinc-800/80"], [class~="bg-zinc-800/60"], [class~="bg-zinc-800/50"]) { background-color: var(--surface-muted); }
+.app-main [class~="bg-zinc-100"] { background-color: var(--brand); }
 
 .app-main [class~="border-zinc-900"] { border-color: #1e293b; }
-.app-main :is([class~="border-zinc-800"], [class~="border-zinc-800/80"]) { border-color: #2b3950; }
-.app-main :is([class~="border-zinc-700"], [class~="border-zinc-700/80"]) { border-color: #3b4a63; }
+.app-main :is([class~="border-zinc-800"], [class~="border-zinc-800/80"]) { border-color: var(--border-soft); }
+.app-main :is([class~="border-zinc-700"], [class~="border-zinc-700/80"]) { border-color: var(--border-strong); }
 .app-main [class~="border-zinc-600"] { border-color: #64748b; }
 
-.app-main :is([class~="text-zinc-50"], [class~="text-zinc-100"], [class~="text-zinc-200"]) { color: #f1f5f9; }
-.app-main [class~="text-zinc-300"] { color: #cbd5e1; }
-.app-main [class~="text-zinc-400"] { color: #94a3b8; }
+.app-main :is([class~="text-zinc-50"], [class~="text-zinc-100"], [class~="text-zinc-200"]) { color: var(--text-main); }
+.app-main [class~="text-zinc-300"] { color: var(--text-soft); }
+.app-main [class~="text-zinc-400"] { color: var(--text-muted); }
 .app-main [class~="text-zinc-500"] { color: #7c8ba1; }
 .app-main [class~="text-zinc-600"] { color: #64748b; }
 .app-main [class~="text-zinc-950"] { color: #ffffff; }
 
-.app-main :is(input, select, textarea) { color: #e2e8f0; caret-color: #818cf8; }
+.app-main :is(input, select, textarea) { color: var(--text-main); caret-color: var(--brand-hover); }
 .app-main :is(input, select, textarea)::placeholder { color: #64748b; }
 .app-main :is([class~="hover:bg-zinc-800"], [class~="hover:bg-zinc-800/80"]):hover { background-color: #334155; }
 .app-main [class~="hover:bg-zinc-900"]:hover { background-color: #1e293b; }
-.app-main [class~="hover:bg-white"]:hover { background-color: #6366f1; }
+.app-main [class~="hover:bg-white"]:hover { background-color: var(--brand-hover); }
 .app-main [class~="hover:text-zinc-100"]:hover { color: #f8fafc; }
-.app-main [class~="focus:border-zinc-500"]:focus { border-color: #6366f1; }
-.app-main [class~="focus:border-zinc-300"]:focus { border-color: #4f46e5; }
+.app-main [class~="focus:border-zinc-500"]:focus { border-color: var(--brand-hover); }
+.app-main [class~="focus:border-zinc-300"]:focus { border-color: var(--brand); }
 .app-main [class~="focus:ring-zinc-500/20"]:focus { --tw-ring-color: rgb(99 102 241 / 0.2); }
 
 .dialog-content :is(input, select, textarea) { border-color: #3b4a63; background: #0f172a; color: #e2e8f0; }
@@ -48,6 +78,13 @@ button, input, select { font: inherit; }
 .dialog-content :is([class~="border-zinc-800"], [class~="border-zinc-700"]) { border-color: #3b4a63; }
 .dialog-content [class~="bg-zinc-100"] { background-color: #4f46e5; }
 .dialog-content [class~="text-zinc-950"] { color: #ffffff; }
+.brand-logo, .brand-active { background: linear-gradient(135deg, var(--brand-hover), var(--brand)); box-shadow: 0 8px 24px rgb(var(--brand-rgb) / .22); }
+.brand-text { color: var(--brand-hover); }
+.brand-avatar { border: 1px solid rgb(var(--brand-rgb) / .38); background: rgb(var(--brand-rgb) / .18); color: var(--brand-hover); }
+html[data-theme="light"] .app-main { color: var(--text-main); }
+html[data-theme="light"] .app-main [class~="text-zinc-500"] { color: #64748b; }
+html[data-theme="light"] .app-main [class~="text-zinc-600"] { color: #94a3b8; }
+html[data-theme="light"] .app-main [class~="text-zinc-950"] { color: white; }
 .toast-progress { position: relative; overflow: hidden; }
 .toast-progress::after { content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 2px; background: currentColor; opacity: .55; transform-origin: right; animation: toast-progress 7s linear forwards; }
 @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }

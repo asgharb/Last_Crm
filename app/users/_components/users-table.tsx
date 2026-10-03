@@ -3,8 +3,8 @@
 import {useEffect, useState, useTransition} from "react";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
-import {Pencil, Plus, Search, Trash2, Users, UserRound, Power} from "lucide-react";
-import {createUser, setUserActive, softDeleteUser, updateUser} from "@/lib/actions/users";
+import {KeyRound, Pencil, Plus, Search, Trash2, Users, UserRound, Power} from "lucide-react";
+import {createUser, resetUserPassword, setUserActive, softDeleteUser, updateUser} from "@/lib/actions/users";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -54,6 +54,8 @@ export function UsersTable({initialUsers}: { initialUsers: User[] }) {
     const [users, setUsers] = useState(initialUsers);
     const [query, setQuery] = useState("");
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [passwordUser, setPasswordUser] = useState<User | null>(null);
+    const [newPassword, setNewPassword] = useState("");
     const [form, setForm] = useState<FormState>(emptyForm);
     const [pending, startTransition] = useTransition();
 
@@ -129,6 +131,23 @@ export function UsersTable({initialUsers}: { initialUsers: User[] }) {
         });
     }
 
+    function submitPasswordReset(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!passwordUser) return;
+        startTransition(async () => {
+            try {
+                await resetUserPassword({userId: passwordUser.id, newPassword});
+                setUsers((current) => current.map((user) => user.id === passwordUser.id ? {...user, isActive: true} : user));
+                setPasswordUser(null);
+                setNewPassword("");
+                toast.success("گذرواژه کاربر بازنشانی شد", {description: "حساب کاربر فعال و نشست‌های قبلی بسته شدند."});
+                router.refresh();
+            } catch (error) {
+                reportError(error);
+            }
+        });
+    }
+
     function openEditDialog(user: User) {
         setForm({
             id: user.id,
@@ -151,7 +170,7 @@ export function UsersTable({initialUsers}: { initialUsers: User[] }) {
                         <input
                             value={query}
                             onChange={(event) => setQuery(event.target.value)}
-                            placeholder="جست‌وجوی نام یا ایمیل"
+                            placeholder="جست‌وجوی نام یا نام کاربری"
                             className="w-full rounded-lg border border-zinc-800 bg-zinc-950 py-2 pl-3 pr-9 text-sm outline-none focus:border-zinc-600"
                         />
                     </div>
@@ -238,6 +257,14 @@ export function UsersTable({initialUsers}: { initialUsers: User[] }) {
                                             className="rounded-md p-1.5 text-blue-500 hover:bg-zinc-800 hover:text-white"
                                         >
                                             <Pencil className="size-4"/>
+                                        </button>
+                                        <button
+                                            onClick={() => { setPasswordUser(user); setNewPassword(""); }}
+                                            aria-label="بازنشانی گذرواژه کاربر"
+                                            title="بازنشانی گذرواژه"
+                                            className="rounded-md p-1.5 text-violet-400 hover:bg-zinc-800 hover:text-white"
+                                        >
+                                            <KeyRound className="size-4"/>
                                         </button>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
@@ -362,6 +389,24 @@ export function UsersTable({initialUsers}: { initialUsers: User[] }) {
                             >
                                 {pending ? "در حال ذخیره…" : "ذخیره"}
                             </button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
+            <Dialog open={Boolean(passwordUser)} onOpenChange={(open) => { if (!open) { setPasswordUser(null); setNewPassword(""); } }}>
+                <DialogContent>
+                    <DialogTitle>بازنشانی گذرواژه</DialogTitle>
+                    <DialogDescription>برای «{passwordUser?.name}» گذرواژه جدید تعیین کنید. این کار حساب قفل‌شده را فعال و نشست‌های قبلی را باطل می‌کند.</DialogDescription>
+                    <form onSubmit={submitPasswordReset} className="mt-6 space-y-4">
+                        <label className="block space-y-1.5 text-sm">گذرواژه جدید
+                            <input required minLength={12} type="password" autoComplete="new-password" value={newPassword}
+                                   onChange={(event) => setNewPassword(event.target.value)}
+                                   className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 outline-none focus:border-zinc-500" />
+                            <span className="block text-xs text-zinc-500">حداقل ۱۲ نویسه</span>
+                        </label>
+                        <div className="flex justify-end gap-2 pt-2">
+                            <button type="button" onClick={() => setPasswordUser(null)} className="rounded-lg border border-zinc-700 px-4 py-2 text-sm">انصراف</button>
+                            <button disabled={pending} className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-950 disabled:opacity-50">{pending ? "در حال بازنشانی..." : "بازنشانی گذرواژه"}</button>
                         </div>
                     </form>
                 </DialogContent>

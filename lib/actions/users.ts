@@ -42,6 +42,35 @@ export async function setUserActive(id: string, isActive: boolean) {
   else await auth.api.banUser({ headers: await headers(), body: { userId: parsed, banReason: "Account disabled by administrator" } });
   await repo.update(parsed, { isActive }); revalidatePath("/users"); return { success: true };
 }
+
+export async function resetUserPassword(input: unknown) {
+  await requireAdmin();
+  const parsed = z.object({
+    userId: z.string().min(1).max(64),
+    newPassword: z.string().min(12, "گذرواژه باید حداقل ۱۲ نویسه باشد."),
+  }).parse(input);
+  const requestHeaders = await headers();
+
+  await auth.api.setUserPassword({
+    headers: requestHeaders,
+    body: { userId: parsed.userId, newPassword: parsed.newPassword },
+  });
+  await auth.api.unbanUser({ headers: requestHeaders, body: { userId: parsed.userId } });
+  await auth.api.revokeUserSessions({ headers: requestHeaders, body: { userId: parsed.userId } });
+  await db.user.update({
+    where: { id: parsed.userId },
+    data: {
+      isActive: true,
+      banned: false,
+      banReason: null,
+      banExpires: null,
+      failedLoginAttempts: 0,
+      lastFailedLoginAt: null,
+    },
+  });
+  revalidatePath("/users");
+  return { success: true };
+}
 export async function softDeleteUser(id: string) {
   await requireAdmin(); const parsed = z.string().min(1).max(64).parse(id);
   await auth.api.banUser({ headers: await headers(), body: { userId: parsed, banReason: "Account removed by administrator" } });

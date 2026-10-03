@@ -24,10 +24,21 @@ model User {
   isActive        Boolean   @default(true)
   isDeleted       Boolean   @default(false)
   deletedAt       DateTime? @db.DateTime2
+  failedLoginAttempts Int    @default(0)
+  lastFailedLoginAt   DateTime? @db.DateTime2
   sessions        Session[]
   accounts        Account[]
 
   @@index([isDeleted], map: "user_is_deleted_idx")
+}
+
+model OrganizationSetting {
+  id               String   @id @default("default") @db.NVarChar(32)
+  organizationName String   @default("پنل مدیریت") @db.NVarChar(160)
+  logoData         String?  @db.NVarChar(Max)
+  themeMode        String   @default("dark") @db.NVarChar(20)
+  themeColor       String   @default("indigo") @db.NVarChar(20)
+  updatedAt        DateTime @updatedAt @db.DateTime2
 }
 
 model RolePermission {

@@ -28,18 +28,35 @@ export default function BackupPage() {
         }
     }
 
-    function downloadSqlBackup() {
+    async function downloadSqlBackup() {
         setDownloadingSql(true);
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "/api/backup/sql-server";
-        form.target = "_blank";
-        form.style.display = "none";
-        document.body.appendChild(form);
-        form.submit();
-        form.remove();
-        toast.info("تهیهٔ فایل پشتیبان SQL Server آغاز شد؛ دانلود پس از پایان عملیات شروع می‌شود.");
-        window.setTimeout(() => setDownloadingSql(false), 5000);
+        const loadingToast = toast.loading("در حال تهیهٔ فایل پشتیبان SQL Server...");
+
+        try {
+            const response = await fetch("/api/backup/sql-server", {method: "POST"});
+            if (!response.ok) {
+                const result = await response.json().catch(() => null) as { error?: string } | null;
+                throw new Error(result?.error || "تهیهٔ فایل پشتیبان SQL Server انجام نشد.");
+            }
+
+            const blob = await response.blob();
+            const disposition = response.headers.get("Content-Disposition") || "";
+            const fileName = disposition.match(/filename="([^"]+)"/)?.[1]
+                || `dashboard-backup-${new Date().toISOString().slice(0, 10)}.bak`;
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            toast.success("فایل پشتیبان SQL Server آماده و دانلود شد.", {id: loadingToast});
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "تهیهٔ فایل پشتیبان SQL Server انجام نشد.", {id: loadingToast});
+        } finally {
+            setDownloadingSql(false);
+        }
     }
 
     return <section className="mx-auto max-w-4xl p-5 sm:p-8 lg:p-10">
